@@ -9,7 +9,7 @@
 #include "device.h"
 #include "driverlib.h"
 #include "board.h"
-#include "sys.h"
+#include "sys_init.h"
 
 // 全局变量
 uint16_t DEBUG_TOGGLE = 1;                // 用于实时模式的调制
@@ -23,7 +23,7 @@ uint32_t PwmDuty;                         // 测量的PWM占空比
 uint32_t PwmPeriod;                       // 测量的PWM周期
 uint16_t ClaFilteredOutput;               // CLA过滤器输出
 
-float32_t xDelay[FILTER_LEN] = {0,0,0,0,0}; // filter delay chain
+float32_t xDelay[FILTER_LEN] = {0,0,0,0,0};                         // filter delay chain
 float32_t coeffs[FILTER_LEN] = {0.0625, 0.25, 0.375, 0.25, 0.0625}; // filter coefficients
 
 
@@ -34,27 +34,18 @@ float32_t coeffs[FILTER_LEN] = {0.0625, 0.25, 0.375, 0.25, 0.0625}; // filter co
 
 
 //#pragma DATA_SECTION(AdcBufRaw, "dmaMemBufs");
-uint16_t AdcBufRaw[2*ADC_BUF_LEN];          // ADC raw data buffer allocation
+uint16_t AdcBufRaw[2*ADC_BUF_LEN];          // ADC原始数据缓冲区分配
 
 
 // main
 int main(void){
-    // CPU上电初始化
-    Device_init();
-    Interrupt_initModule();
-    Interrupt_initVectorTable();
-    Board_init();
-    InitWatchdog();
+    DINT;
 
+    sys_init();
 
-    // 外设初始化
-    InitEPwm();
-    InitAdca();
-    InitDacb();
-    InitECap();
-    InitCla();
+    sys_per_init();
 
-    // Enables CPU interrupts
+    // 开启CPU中断
     Interrupt_enableMaster();
 
 
